@@ -1,0 +1,143 @@
+/*A Cela - Jogo criado por João Flávio de Morais Cury e Camila Tainá Fernandes Silvano*/
+
+/*O jogador acorda numa cela estranha e deve encontrar um meio para fugir*/
+
+
+:- dynamic estado/2, segurando/1, naopego/1, estado/2.
+
+
+/*Objetos do jogo*/
+
+cela(pia).
+cela(elevador_de_carga).
+cela(cama).
+cela(duto_de_ventilacao).
+cela(porta).
+
+/*Objetos pegaveis*/
+
+naopego(registro).
+naopego(chave_da_porta).
+naopego(chave_de_fenda).
+naopego(cartao).
+naopego(barra_de_ferro).
+
+/*Estados dos objetos do jogo*/
+
+estado(pia,' esta com um liquido estranho dentro... voce nao vai colocar a mao ai! Um registro dela esta solto.').
+estado(elevador_de_carga,' esta travado, precisa-se de um cartao magnetico para faze-lo funcionar').
+estado(cama,' esta suja e desarrumada, parece que as pernas de ferro estao meio soltas.').
+estado(duto_de_ventilacao,' esta fazendo um barulho de ar, voce ve um objeto brilhante mais a frente, mas nao consegue alcanca-lo, talves se vc removesse a grade...').
+estado(porta,' esta trancada, voce nao pode sair!').
+
+
+/*comandos*/
+
+olhar :-
+	cela(X),
+	write('Olhando você vê: '), write(X),nl,
+	fail.
+
+checar(X) :-
+	estado(X,Y), nl,
+	write('O/A '),write(X), write(Y).
+
+pegar(X) :-
+	cela(X),
+	write('Voce nao pode pegar: '), write(X), nl.
+
+pegar(Z) :- 
+	segurando(X),
+	not(X=Z),
+	write('Voce esta com as maos ocupadas, esta segurando: '), write(X).
+	
+pegar(Z) :-
+	retract(naopego(Z)),
+	assert(segurando(Z)), nl,
+	write('Voce pegou: '), write(Z).
+
+largar(X) :-
+	segurando(X),
+	retract(segurando(X)),
+	assert(naopego(X)),
+	write('Voce colocou o/a '), write(X), write(' de volta no lugar.').
+
+largar(_) :-
+	write(' Voce nao esta segurando nada!'), nl.
+
+usar(X,Y) :-
+	segurando(X),
+	X=registro,
+	Y=pia,
+	write('Voce abriu a torneira, a agua fluiu e agora voce ve um cartao que pode pegar!!!'),
+	retract(segurando(X)),
+	retract(estado(pia,_)),
+	assert(estado(pia,' esta limpa e nao contem nada.')).
+	
+	 
+usar(X,Y) :-
+	segurando(X),
+	X=cartao,
+	Y=elevador_de_carga,
+	write('Voce utilizou o cartao no elevador, ele contem uma chave_de_fenda!!!'),
+	retract(segurando(X)),
+	retract(estado(elevador_de_carga,_)),
+	assert(estado(elevador_de_carga,' esta aberto!')).
+
+usar(X,Y) :-
+	segurando(X),
+	X=chave_de_fenda,
+	Y=cama,
+	write('Voce desparafusou uma das pernas da cama, agora voce pode pegar uma barra_de_ferro!!'),
+	retract(segurando(X)),
+	retract(estado(cama,_)),
+	assert(estado(cama, ' desmontada, nao se pode deitar nela!')).
+
+usar(X,Y) :-
+	segurando(X),
+	X=barra_de_ferro,
+	Y=duto_de_ventilacao,
+	write('Voce entortou as grades do duto, la voce ve uma pequena chave (cave_da_porta)!!'),
+	retract(segurando(X)),
+	retract(estado(duto_de_ventilacao,_)),
+	assert(estado(duto_de_ventilacao,' aberto mas a passagem e mto pequena!')).
+
+usar(X,Y) :-
+	segurando(X),
+	X=chave_da_porta,
+	Y=porta,
+	write('Voce finalmente conseguiu abrir a porta e esta livre!!!'), nl,
+	write(' FIM DO JOGO! VOCE VENCEU! '),
+	write(' Digite "sair" para sair do jogo!'),
+	retract(segurando(X)),
+	retract(estado(porta,_)),
+	assert(estado(porta,' esta aberta!')).
+
+iniciar:- nl, 
+	write('Você acorda em uma cela suja e úmida, o mais importante'), nl,
+	write('é que você não se lembra como veio parar neste lugar,'), nl,
+	write('agora sua única opção é sair a tempo para que algo de'), nl,
+	write('ruim não aconteça com você. O que você deseja fazer?'), nl.
+  
+ sair:- halt.	
+
+
+/*Instruções para se jogar.*/
+
+instrucoes :-
+        nl,
+        write('Entre com os comandos usando a sintaxe do Prolog.'), nl,
+        write('Comandos Disponíveis:'), nl,
+        write('iniciar.                  -- Para começar o jogo.'), nl,
+        write('checar(Objeto).           -- Para checar um objeto.'), nl,
+	write('pegar(Objeto).            -- Para pegar um objeto.'), nl,
+        write('largar(Objeto).           -- Para largar um objeto.'), nl,
+        write('usar(Objeto1, Objeto2).   -- Para usar um objeto em outro.'), nl,
+        write('olhar.                    -- Para olhar em volta.'), nl,
+        write('instrucoes.               -- para rever as instruções.'), nl,
+        write('sair.                     -- sair do jogo.'), nl,
+        nl.
+
+/* iniciar o jogo*/
+
+:- instrucoes.
